@@ -1,10 +1,8 @@
-package main
+package app
 
-import (
-	"github.com/gofiber/fiber/v3"
-)
+import "github.com/gofiber/fiber/v3"
 
-func main() {
+func RunServer() {
 	app := fiber.New()
 
 	app.Get("/", func(c fiber.Ctx) error {
