@@ -16,6 +16,18 @@ var rootCmd = &cobra.Command{
 	},
 }
 
+func Execute() {
+	cobra.CheckErr(rootCmd.Execute())
+}
+
+func init() {
+	cobra.OnInitialize(initConfig)
+
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is .env)")
+
+	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
 func initConfig() {
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
@@ -28,8 +40,4 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
-}
-
-func Execute() {
-	cobra.CheckErr(rootCmd.Execute())
 }

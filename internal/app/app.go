@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"log"
 	"warehouse/config"
 
@@ -9,9 +10,9 @@ import (
 
 func RunServer() {
 	cfg := config.NewConfig()
-	db, err := cfg.ConnetionPostgres()
+	db, err := cfg.ConnectionPostgres()
 	if err != nil {
-		log.Fatal("Failed to connect to database: %v", err)
+		log.Fatalf("Failed to connect to database: %v", err)
 		return
 	}
 
@@ -22,5 +23,13 @@ func RunServer() {
 	app.Get("/", func(c fiber.Ctx) error {
 		return c.SendString("Server start")
 	})
-	app.Listen(":8000")
+
+	port := cfg.App.AppPort
+	if port == "" {
+		port = "8000"
+	}
+
+	if err := app.Listen(fmt.Sprintf(":%s", port)); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }

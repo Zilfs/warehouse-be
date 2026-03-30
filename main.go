@@ -1,8 +1,6 @@
 package main
 
-import (
-	"warehouse/cmd"
-)
+import "warehouse/cmd"
 
 func main() {
 	cmd.Execute()

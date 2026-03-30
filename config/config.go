@@ -18,8 +18,8 @@ type PgsqlDB struct {
 }
 
 type Config struct {
-	App     App
-	PgsqlDB PgsqlDB
+	App   App
+	Pgsql PgsqlDB
 }
 
 func NewConfig() *Config {
@@ -29,7 +29,7 @@ func NewConfig() *Config {
 			AppEnv:  viper.GetString("APP_ENV"),
 		},
 
-		PgsqlDB: PgsqlDB{
+		Pgsql: PgsqlDB{
 			Host:      viper.GetString("DATABASE_HOST"),
 			Port:      viper.GetString("DATABASE_PORT"),
 			User:      viper.GetString("DATABASE_USER"),

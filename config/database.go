@@ -13,18 +13,18 @@ type Postgres struct {
 	DB *gorm.DB
 }
 
-func (cfg Config) ConnetionPostgres() (*Postgres, error) {
+func (cfg Config) ConnectionPostgres() (*Postgres, error) {
 	dbConnString := fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
-		cfg.PgsqlDB.User,
-		cfg.PgsqlDB.Password,
-		cfg.PgsqlDB.Host,
-		cfg.PgsqlDB.Port,
-		cfg.PgsqlDB.DBName,
+		cfg.Pgsql.User,
+		cfg.Pgsql.Password,
+		cfg.Pgsql.Host,
+		cfg.Pgsql.Port,
+		cfg.Pgsql.DBName,
 	)
 
 	db, err := gorm.Open(postgres.Open(dbConnString), &gorm.Config{})
 	if err != nil {
-		log.Error().Err(err).Msg("[Connection Postgres-1] Failed to connect to database " + cfg.PgsqlDB.Host)
+		log.Error().Err(err).Msg("[Connection Postgres-1] Failed to connect to database " + cfg.Pgsql.Host)
 		return nil, err
 	}
 
@@ -34,8 +34,8 @@ func (cfg Config) ConnetionPostgres() (*Postgres, error) {
 		return nil, err
 	}
 
-	maxOpen, _ := strconv.Atoi(cfg.PgsqlDB.DBMaxOpen)
-	maxIdle, _ := strconv.Atoi(cfg.PgsqlDB.DBMaxIdle)
+	maxOpen, _ := strconv.Atoi(cfg.Pgsql.DBMaxOpen)
+	maxIdle, _ := strconv.Atoi(cfg.Pgsql.DBMaxIdle)
 
 	pgsqlDB.SetMaxOpenConns(maxOpen)
 	pgsqlDB.SetMaxIdleConns(maxIdle)
