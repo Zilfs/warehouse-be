@@ -13,6 +13,9 @@ var startCmd = &cobra.Command{
 	Short: "Starts the server",
 	Run: func(cmd *cobra.Command, args []string) {
 		port := viper.GetString("APP_PORT")
+		if port == "" {
+			port = "8000" // Default port jika .env tidak terbaca
+		}
 		fmt.Println("Starting server on port", port)
 		app.RunServer()
 	},

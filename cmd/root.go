@@ -11,9 +11,6 @@ var cfgFile string
 var rootCmd = &cobra.Command{
 	Use:   "core-api",
 	Short: "api for warehouse app",
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Run(startCmd, nil)
-	},
 }
 
 func Execute() {
@@ -24,8 +21,9 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is .env)")
-
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	rootCmd.AddCommand(startCmd)
 }
 
 func initConfig() {
