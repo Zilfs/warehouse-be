@@ -5,7 +5,7 @@ import (
 	"warehouse/internal/core/domain/model"
 	"warehouse/internal/core/ports"
 
-	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3" // Pastikan v3 konsisten
 )
 
 type UserHandler struct {
@@ -14,37 +14,43 @@ type UserHandler struct {
 
 func NewUserHandler(app *fiber.App, uc ports.UserUsecase) {
 	h := &UserHandler{usecase: uc}
+
 	api := app.Group("/api/v1")
 
-	api.Post("/users", h.usecase.CreateUser)
-	api.Get("/users", h.usecase.GetAllUsers)
-	api.Post("/users:ID", h.usecase.GetUserByID)
+	// SALAH: api.Post("/users", uc.CreateUser)
+	// BENAR: Gunakan method dari struct handler (h.Create)
+	api.Post("/users", h.Create)
+	api.Get("/users", h.GetAll)
 }
 
 func (h *UserHandler) Create(c fiber.Ctx) error {
 	var req model.UserRequest
+
+	// 1. Parse JSON body ke struct request
 	if err := c.Bind().Body(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(400).JSON(fiber.Map{"error": "Invalid input"})
 	}
 
-	user := entity.User{
+	// 2. Mapping dari Model Request ke Entity
+	userEntity := &entity.User{
 		Username: req.Username,
 		Email:    req.Email,
 		Password: req.Password,
 	}
 
-	if err := h.usecase.CreateUser(c.Context(), &user); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	// 3. Panggil Usecase (Logic)
+	if err := h.usecase.CreateUser(c.Context(), userEntity); err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "User created successfully"})
+	return c.Status(201).JSON(fiber.Map{"message": "User created successfully"})
 }
 
 func (h *UserHandler) GetAll(c fiber.Ctx) error {
-	users, _ := h.usecase.GetAllUsers(c.Context())
-	var response []model.UserResponse
-	for _, u := range users {
-		response = append(response, model.UserResponse{ID: u.ID, Username: u.Username, Email: u.Email})
+	users, err := h.usecase.GetAllUsers(c.Context())
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
-	return c.JSON(response)
+
+	return c.Status(200).JSON(fiber.Map{"data": users})
 }
