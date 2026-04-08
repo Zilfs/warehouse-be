@@ -18,12 +18,11 @@ func NewUserHandler(app *fiber.App, uc ports.UserUsecase) {
 
 	api := app.Group("/api/v1")
 
-	// SALAH: api.Post("/users", uc.CreateUser)
-	// BENAR: Gunakan method dari struct handler (h.Create)
 	api.Post("/users", h.Create)
 	api.Get("/users", h.GetAll)
 	api.Get("/users/:id", h.GetByID)
 	api.Put("/users/:id", h.Update)
+	api.Delete("/users/:id", h.Delete)
 
 }
 
@@ -99,4 +98,18 @@ func (h *UserHandler) Update(c fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(fiber.Map{"message": "User updated successfully"})
+}
+
+func (h *UserHandler) Delete(c fiber.Ctx) error {
+	id := c.Params("id")
+	userId, err := utils.StringToInt(id)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	if err := h.usecase.DeleteUser(c.Context(), userId); err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"message": "User deleted successfully"})
 }
