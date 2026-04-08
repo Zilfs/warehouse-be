@@ -4,6 +4,7 @@ import (
 	"warehouse/internal/core/domain/entity"
 	"warehouse/internal/core/domain/model"
 	"warehouse/internal/core/ports"
+	"warehouse/pkg/utils"
 
 	"github.com/gofiber/fiber/v3" // Pastikan v3 konsisten
 )
@@ -21,6 +22,7 @@ func NewUserHandler(app *fiber.App, uc ports.UserUsecase) {
 	// BENAR: Gunakan method dari struct handler (h.Create)
 	api.Post("/users", h.Create)
 	api.Get("/users", h.GetAll)
+	api.Get("/users/:id", h.GetByID)
 }
 
 func (h *UserHandler) Create(c fiber.Ctx) error {
@@ -53,4 +55,18 @@ func (h *UserHandler) GetAll(c fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(fiber.Map{"data": users})
+}
+
+func (h *UserHandler) GetByID(c fiber.Ctx) error {
+	id := c.Params("id")
+	userId, err := utils.StringToInt(id)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+	user, err := h.usecase.GetUserByID(c.Context(), userId)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"data": user})
 }
