@@ -23,6 +23,8 @@ func NewUserHandler(app *fiber.App, uc ports.UserUsecase) {
 	api.Post("/users", h.Create)
 	api.Get("/users", h.GetAll)
 	api.Get("/users/:id", h.GetByID)
+	api.Put("/users/:id", h.Update)
+
 }
 
 func (h *UserHandler) Create(c fiber.Ctx) error {
@@ -69,4 +71,32 @@ func (h *UserHandler) GetByID(c fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(fiber.Map{"data": user})
+}
+
+func (h *UserHandler) Update(c fiber.Ctx) error {
+	var req model.UserRequest
+	id := c.Params("id")
+	userId, err := utils.StringToInt(id)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	if err := c.Bind().Body(&req); err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	user, err := h.usecase.GetUserByID(c.Context(), userId)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	user.Username = req.Username
+	user.Email = req.Email
+	user.Password = req.Password
+
+	if err := h.usecase.UpdateUser(c.Context(), user); err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"message": "User updated successfully"})
 }
