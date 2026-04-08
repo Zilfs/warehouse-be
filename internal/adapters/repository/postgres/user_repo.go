@@ -4,6 +4,7 @@ import (
 	"context"
 	"warehouse/internal/core/domain/entity"
 	"warehouse/internal/core/ports"
+	"warehouse/pkg/utils"
 
 	"gorm.io/gorm"
 )
@@ -29,7 +30,11 @@ func (UserDB) TableName() string {
 }
 
 func (r *userRepo) Save(ctx context.Context, u *entity.User) error {
-	dbModel := UserDB{Username: u.Username, Email: u.Email, Password: u.Password}
+	HashedPassword, err := utils.HashPassword(u.Password)
+	if err != nil {
+		return err
+	}
+	dbModel := UserDB{Username: u.Username, Email: u.Email, Password: HashedPassword}
 	return r.db.WithContext(ctx).Create(&dbModel).Error
 }
 
@@ -65,10 +70,14 @@ func (r *userRepo) Update(ctx context.Context, user *entity.User) error {
 	if err := r.db.WithContext(ctx).First(&userDB, user.ID).Error; err != nil {
 		return err
 	}
+	HashedPassword, err := utils.HashPassword(user.Password)
+	if err != nil {
+		return err
+	}
 	userDB.Username = user.Username
 	userDB.Email = user.Email
 	if user.Password != "" {
-		userDB.Password = user.Password
+		userDB.Password = HashedPassword
 	}
 	return r.db.WithContext(ctx).Save(&userDB).Error
 }
