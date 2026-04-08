@@ -14,15 +14,18 @@ type userRepo struct {
 
 // UserDB adalah Persistent Model dengan tag GORM
 type UserDB struct {
-	gorm.Model
-	Username string `gorm:"unique"`
-	Email    string `gorm:"unique"`
-	Password string
+	ID       uint   `gorm:"primaryKey;column:id"`
+	Username string `gorm:"column:username"`
+	Email    string `gorm:"column:email"`
+	Password string `gorm:"column:password"`
 }
 
 func NewUserRepository(db *gorm.DB) ports.UserRepository {
-	db.AutoMigrate(&UserDB{}) // Auto-migrate tabel
 	return &userRepo{db}
+}
+
+func (UserDB) TableName() string {
+	return "users"
 }
 
 func (r *userRepo) Save(ctx context.Context, u *entity.User) error {
